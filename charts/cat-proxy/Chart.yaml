@@ -2,5 +2,5 @@ apiVersion: v2
 name: cat-proxy
 description: A Helm chart for deploying a proxy server
 type: application
-version: 2.0.1
+version: 2.0.0
 appVersion: "b2fce648"
