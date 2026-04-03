@@ -1,43 +1,120 @@
-{{- if .Values.ingress.enabled -}}
+{{- if and $.Values.http.enabled $.Values.http.ingress.enabled }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "cat-proxy.fullname" . }}
-  labels:
-    {{- include "cat-proxy.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
+  name: {{ printf "%s-ingress" .Chart.Name }}
+  {{- with $.Values.http.ingress.annotations }}
+  annotations: 
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.ingress.className }}
-  ingressClassName: {{ . }}
+  {{- with $.Values.http.ingress.className }}
+  ingressClassName: {{ $.Values.http.ingress.className }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- if $.Values.http.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range $.Values.http.ingress.tls }}
     - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
+      {{- range .hosts }}
+      - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}  
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    {{- range $.Values.http.ingress.hosts}}
+    - host: {{ .host }}
       http:
         paths:
-          {{- range .paths }}
+          {{- range .paths}}
           - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "cat-proxy.fullname" $ }}
+                name: {{ printf "%s-http-service" $.Chart.Name }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ $.Values.http.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- if and $.Values.socks5.enabled $.Values.socks5.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-ingress" .Chart.Name }}
+  {{- with $.Values.socks5.ingress.annotations }}
+  annotations: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $.Values.socks5.ingress.className }}
+  ingressClassName: {{ $.Values.socks5.ingress.className }}
+  {{- end }}
+  {{- if $.Values.socks5.ingress.tls }}
+  tls:
+    {{- range $.Values.socks5.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+      - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}  
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range $.Values.socks5.ingress.hosts}}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths}}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ printf "%s-socks5-service" $.Chart.Name }}
+                port:
+                  number: {{ $.Values.socks5.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- if and $.Values.dns.enabled $.Values.socks5.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-ingress" .Chart.Name }}
+  {{- with $.Values.dns.ingress.annotations }}
+  annotations: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with $.Values.dns.ingress.className }}
+  ingressClassName: {{ $.Values.dns.ingress.className }}
+  {{- end }}
+  {{- if $.Values.dns.ingress.tls }}
+  tls:
+    {{- range $.Values.dns.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+      - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}  
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range $.Values.dns.ingress.hosts}}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths}}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ printf "%s-dns-service" $.Chart.Name }}
+                port:
+                  number: {{ $.Values.dns.port }}
           {{- end }}
     {{- end }}
 {{- end }}
