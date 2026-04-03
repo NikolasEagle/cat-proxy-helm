@@ -1,7 +1,7 @@
 image:
   repository: registry.gitlab.com/eagledevstack/cat-proxy
   pullPolicy: IfNotPresent
-  tag: "66f9cdd0"
+  tag: "b2fce648"
   imagePullSecrets: []
 
 replicaCount: 1
