@@ -1,15 +1,48 @@
+{{- if $.Values.http.enabled }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cat-proxy.fullname" . }}
-  labels:
-    {{- include "cat-proxy.labels" . | nindent 4 }}
+  name: {{ printf "%s-http-service" .Chart.Name }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    {{- include "cat-proxy.selectorLabels" . | nindent 4 }}
+    app: {{ printf "%s-app" .Chart.Name }}
+  type: {{ $.Values.http.type }}
+  ports:
+  - name: {{ printf "%s-http" .Chart.Name }}
+    protocol: {{ $.Values.http.protocol }}
+    port: {{ $.Values.http.port }}
+    targetPort: {{ $.Values.http.targetPort }}
+{{- end }}
+{{- if $.Values.socks5.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-socks5-service" .Chart.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-app" .Chart.Name }}
+  type: {{ $.Values.socks5.type }}
+  ports:
+  - name: {{ printf "%s-socks5" .Chart.Name }}
+    protocol: {{ $.Values.socks5.protocol }}
+    port: {{ $.Values.socks5.port }}
+    targetPort: {{ $.Values.socks5.targetPort }}
+{{- end }}
+{{- if $.Values.dns.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-dns-service" .Chart.Name }}
+spec:
+  selector:
+    app: {{ printf "%s-app" .Chart.Name }}
+  type: {{ $.Values.dns.type }}
+  ports:
+  - name: {{ printf "%s-dns" .Chart.Name }}
+    protocol: {{ $.Values.dns.protocol }}
+    port: {{ $.Values.dns.port }}
+    targetPort: {{ $.Values.dns.targetPort }}
+{{- end }}
